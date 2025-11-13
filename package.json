@@ -1,0 +1,21 @@
+{
+  "name": "stock-ticker-view-root",
+  "version": "1.0.0",
+  "description": "Root project to run C# and React apps concurrently",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+
+    "start:backend": "cd backendServer/StockTicker && dotnet run",
+
+    "start:frontend": "cd frontend && npm run dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

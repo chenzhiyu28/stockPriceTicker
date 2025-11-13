@@ -1,3 +1,6 @@
+// to use this backend, need to change the "timeStamp" type in frontend from string to Date
+
+
 import express from 'express';
 import cors from 'cors';
 import { stockService } from './services/stockService';
