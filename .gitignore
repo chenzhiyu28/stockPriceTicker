@@ -1,0 +1,18 @@
+*.lock.json
+*.patch
+
+# --- .NET ---
+**/bin/
+**/obj/
+
+
+# --- Node.js ---
+**/node_modules/
+
+**/.vite/
+
+**/dist/
+**/build/
+
+.env
+.env*.local

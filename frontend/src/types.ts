@@ -1,0 +1,5 @@
+export interface StockPrice {
+    name: string;
+    price: number;
+    timeStamp: string;
+}
