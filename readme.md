@@ -18,4 +18,10 @@ This project uses `concurrently` to launch the backend and frontend with a singl
 
 ### 1. Install Dependencies
 
-You must install dependencies for **both** the root-level script and the frontend.
+npm install
+
+### 2. Start Services
+
+npm start
+
+### 3. Visualize the app

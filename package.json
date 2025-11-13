@@ -10,7 +10,9 @@
 
     "start:backend": "cd backendServer/StockTicker && dotnet run",
 
-    "start:frontend": "cd frontend && npm run dev"
+    "start:frontend": "cd frontend && npm run dev",
+
+    "postinstall": "cd frontend && npm install"
   },
   "keywords": [],
   "author": "",
