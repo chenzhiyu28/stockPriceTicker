@@ -25,3 +25,5 @@ npm install
 npm start
 
 ### 3. Visualize the app
+
+http://localhost:5173/
