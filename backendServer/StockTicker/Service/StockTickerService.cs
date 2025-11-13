@@ -1,20 +1,24 @@
-// Services/StockTickerService.cs
-
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using StockTicker.Hubs;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace StockTicker.Services
 {
     public class StockTickerService : BackgroundService
     {
         private readonly IHubContext<StockHub> _hubContext;
-
+        private readonly ILogger<StockTickerService> _logger;
         private readonly List<StockPrice> _stocks;
         private readonly Random _random = new();
 
-        public StockTickerService(IHubContext<StockHub> hubContext)
+        public StockTickerService(IHubContext<StockHub> hubContext, ILogger<StockTickerService> logger)
         {
             _hubContext = hubContext;
+            _logger = logger;
 
             _stocks = new List<StockPrice>
             {
@@ -25,28 +29,54 @@ namespace StockTicker.Services
             };
         }
 
-        // scheduled task
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("StockTickerService is starting.");
+
             while (!stoppingToken.IsCancellationRequested)
             {
-                for (int i = 0; i < _stocks.Count; i++)
+                try
                 {
-                    var stock = _stocks[i];
-                    var newPrice = stock.Price * (1 + (_random.NextDouble() - 0.5) * 0.1);
-                    _stocks[i] = stock with
+                    for (int i = 0; i < _stocks.Count; i++)
                     {
-                        Price = Math.Round(newPrice, 2),
-                        TimeStamp = DateTime.Now
-                    };
-                }
+                        var stock = _stocks[i];
+                        var newPrice = stock.Price * (1 + (_random.NextDouble() - 0.5) * 0.1);
+                        _stocks[i] = stock with
+                        {
+                            Price = Math.Round(newPrice, 2),
+                            TimeStamp = DateTime.Now
+                        };
+                    }
 
-                await _hubContext.Clients.All.SendAsync("ReceivePrices", _stocks, stoppingToken);
-                await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+                    await _hubContext.Clients.All.SendAsync("ReceivePrices", _stocks, stoppingToken);
+
+                    await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    //normal shutdown signal.
+                    _logger.LogWarning("StockTickerService is stopping.");
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred in StockTickerService. Retrying after 2s delay.");
+
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        _logger.LogWarning("StockTickerService is stopping during error backoff.");
+                        break;
+                    }
+                }
             }
+
+            _logger.LogInformation("StockTickerService has stopped.");
         }
 
-        //Polling API
         public List<StockPrice> GetStocks()
         {
             return _stocks;
